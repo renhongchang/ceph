@@ -980,7 +980,10 @@ void OSDMap::remove_redundant_temporaries(CephContext *cct, const OSDMap& osdmap
 	         << pgi->first << " -> " << pgi->second << dendl;
 	pending_inc->new_pg_temp[pgi->first].clear();
       }
-      if (can_clear_primary && primary == primaryi->second) {
+      if (can_clear_primary &&
+          ((!can_clear_pg && primary == primaryi->second) ||
+          (can_clear_pg && pending_inc->new_pg_temp.count(pgi->first) &&
+              primary == pending_inc->new_pg_temp[pgi->first].front()))) {
         ldout(cct, 10) << " removing unnecessary primary_temp "
                   << primaryi->first << " -> " << primaryi->second << dendl;
         pending_inc->new_primary_temp[primaryi->first] = -1;
